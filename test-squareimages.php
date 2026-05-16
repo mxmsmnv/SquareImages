@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>SquareImages Test Suite v1.2</title>
+	<title>SquareImages Test Suite v1.3.0</title>
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script>
 		tailwind.config = {
@@ -26,12 +26,16 @@
 		
 		<!-- Header -->
 		<div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 mb-12 shadow-lg">
-			<h1 class="text-4xl font-bold mb-2">SquareImages Module v1.2</h1>
+			<h1 class="text-4xl font-bold mb-2">SquareImages Module v1.3.0</h1>
 			<p class="text-xl text-blue-100">Complete Test Suite</p>
 			<p class="text-sm text-blue-200 mt-2">By Maxim Alex | smnv.org | maxim@smnv.org</p>
 		</div>
 		
 		<?php
+		$siH = function($value) {
+			return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+		};
+
 		// Get test images
 		if ($page->images->count() == 0) {
 			echo '<div class="bg-red-100 border-l-4 border-red-500 p-6"><p class="text-red-700 font-bold">❌ No images found on this page! Please upload test images (e.g., Coca-Cola bottles).</p></div>';
@@ -59,11 +63,11 @@
 					<tbody class="divide-y divide-gray-200">
 						<tr class="hover:bg-gray-50">
 							<td class="px-6 py-4 font-semibold">Module Name</td>
-							<td class="px-6 py-4"><?= $modules->getModuleInfo('SquareImages')['title'] ?></td>
+							<td class="px-6 py-4"><?= $siH($modules->getModuleInfo('SquareImages')['title']) ?></td>
 						</tr>
 						<tr class="hover:bg-gray-50">
 							<td class="px-6 py-4 font-semibold">Version</td>
-							<td class="px-6 py-4 font-mono"><?= $modules->getModuleInfo('SquareImages')['version'] ?></td>
+							<td class="px-6 py-4 font-mono"><?= $siH($modules->getModuleInfo('SquareImages')['version']) ?></td>
 						</tr>
 						<tr class="hover:bg-gray-50">
 							<td class="px-6 py-4 font-semibold">Author</td>
@@ -97,10 +101,10 @@
 						?>
 						<tr class="hover:bg-gray-50">
 							<td class="px-4 py-3 font-bold"><?= $imageNum ?></td>
-							<td class="px-4 py-3 font-mono text-sm"><?= $img->basename ?></td>
+							<td class="px-4 py-3 font-mono text-sm"><?= $siH($img->basename) ?></td>
 							<td class="px-4 py-3"><?= $img->width ?>x<?= $img->height ?>px</td>
 							<td class="px-4 py-3"><?= round($img->filesize / 1024, 2) ?> KB</td>
-							<td class="px-4 py-3"><span class="bg-gray-700 text-white px-2 py-1 font-bold text-xs rounded"><?= strtoupper($img->ext) ?></span></td>
+							<td class="px-4 py-3"><span class="bg-gray-700 text-white px-2 py-1 font-bold text-xs rounded"><?= $siH(strtoupper($img->ext)) ?></span></td>
 						</tr>
 						<?php endforeach; ?>
 					</tbody>
@@ -123,12 +127,12 @@
 							<h3 class="font-bold">Image #<?= $imgNum ?></h3>
 						</div>
 						<div class="p-4">
-							<img src="<?= $img->url ?>" alt="Original <?= $imgNum ?>" class="w-full border border-gray-200">
+							<img src="<?= $siH($img->url) ?>" alt="Original <?= $imgNum ?>" class="w-full border border-gray-200">
 							<div class="mt-4 text-sm space-y-1">
-								<p class="font-mono text-xs"><?= $img->basename ?></p>
+								<p class="font-mono text-xs"><?= $siH($img->basename) ?></p>
 								<p>Original: <span class="font-bold"><?= $img->width ?>x<?= $img->height ?>px</span></p>
 								<p><?= round($img->filesize / 1024, 2) ?> KB</p>
-								<p><span class="bg-gray-700 text-white px-2 py-1 text-xs font-bold rounded"><?= strtoupper($img->ext) ?></span></p>
+								<p><span class="bg-gray-700 text-white px-2 py-1 text-xs font-bold rounded"><?= $siH(strtoupper($img->ext)) ?></span></p>
 							</div>
 							<div class="mt-3 pt-3 border-t border-gray-200">
 								<p class="text-xs font-mono bg-gray-100 px-3 py-2 font-bold rounded">
@@ -151,7 +155,7 @@
 			foreach ($page->images as $testImage): 
 				$imgNum++;
 			?>
-				<h3 class="text-xl font-bold px-6 py-3 bg-gray-100 border-l-4 border-blue-600 mx-6 mb-4">Image #<?= $imgNum ?>: <?= $testImage->basename ?></h3>
+				<h3 class="text-xl font-bold px-6 py-3 bg-gray-100 border-l-4 border-blue-600 mx-6 mb-4">Image #<?= $imgNum ?>: <?= $siH($testImage->basename) ?></h3>
 				<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 px-6 mb-8">
 					<?php
 					$sizes = [100, 200, 300, 500, 800, 1000];
@@ -174,11 +178,11 @@
 							</div>
 							<?php if ($square): ?>
 								<div class="p-3">
-									<img src="<?= $square->url ?>" alt="Square <?= $size ?>" class="w-full border border-gray-200 mb-2">
+									<img src="<?= $siH($square->url) ?>" alt="Square <?= $size ?>" class="w-full border border-gray-200 mb-2">
 									<div class="text-xs space-y-1">
 										<p>Actual: <span class="font-bold"><?= $square->width ?>x<?= $square->height ?>px</span></p>
 										<p><?= round($square->filesize / 1024, 2) ?> KB</p>
-										<p><span class="bg-gray-700 text-white px-2 py-1 font-bold rounded"><?= strtoupper($square->ext) ?></span></p>
+										<p><span class="bg-gray-700 text-white px-2 py-1 font-bold rounded"><?= $siH(strtoupper($square->ext)) ?></span></p>
 										<p><?= $status ?></p>
 									</div>
 									<div class="mt-2 pt-2 border-t border-gray-200">
@@ -223,12 +227,12 @@
 						</div>
 						<?php if ($square): ?>
 							<div class="p-4">
-								<img src="<?= $square->url ?>" alt="Square <?= $imgNum ?>" class="w-full border border-gray-200 mb-3">
+								<img src="<?= $siH($square->url) ?>" alt="Square <?= $imgNum ?>" class="w-full border border-gray-200 mb-3">
 								<div class="text-sm space-y-1">
 									<p>Original: <span class="font-bold"><?= $img->width ?>x<?= $img->height ?>px</span></p>
 									<p>Square: <span class="font-bold"><?= $square->width ?>x<?= $square->height ?>px</span></p>
 									<p>Size: <?= round($square->filesize / 1024, 2) ?> KB</p>
-									<p>Format: <span class="bg-gray-700 text-white px-2 py-1 text-xs font-bold rounded"><?= strtoupper($square->ext) ?></span></p>
+									<p>Format: <span class="bg-gray-700 text-white px-2 py-1 text-xs font-bold rounded"><?= $siH(strtoupper($square->ext)) ?></span></p>
 									<p class="mt-2"><?= $status ?></p>
 								</div>
 								<div class="mt-3 pt-3 border-t border-gray-200">
@@ -255,7 +259,7 @@
 			foreach ($page->images as $testImage): 
 				$imgNum++;
 			?>
-				<h3 class="text-xl font-bold px-6 py-3 bg-gray-100 border-l-4 border-blue-600 mx-6 mb-4">Image #<?= $imgNum ?>: <?= $testImage->basename ?></h3>
+				<h3 class="text-xl font-bold px-6 py-3 bg-gray-100 border-l-4 border-blue-600 mx-6 mb-4">Image #<?= $imgNum ?>: <?= $siH($testImage->basename) ?></h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-6 mb-8">
 					<?php
 					$methods = [
@@ -267,24 +271,24 @@
 					foreach ($methods as $test) {
 						$testsRun++;
 						$result = $testImage->{$test['method']}($test['param']);
-						if ($result) {
+						if ($result && $result->width == $test['param'] && $result->height == $test['param']) {
 							$testsPassed++;
 							?>
 							<div class="border-2 border-green-600 shadow">
 								<div class="bg-gray-100 px-4 py-2 border-b-2 border-green-600">
-									<h4 class="font-bold"><?= $test['label'] ?></h4>
+									<h4 class="font-bold"><?= $siH($test['label']) ?></h4>
 								</div>
 								<div class="p-4">
-									<img src="<?= $result->url ?>" alt="<?= $test['label'] ?>" class="w-full border border-gray-200 mb-2">
+									<img src="<?= $siH($result->url) ?>" alt="<?= $siH($test['label']) ?>" class="w-full border border-gray-200 mb-2">
 									<div class="text-sm">
 										<p class="font-bold"><?= $result->width ?>x<?= $result->height ?>px</p>
 										<p><?= round($result->filesize / 1024, 2) ?> KB</p>
-										<p><span class="bg-gray-700 text-white px-2 py-1 text-xs font-bold rounded"><?= strtoupper($result->ext) ?></span></p>
+										<p><span class="bg-gray-700 text-white px-2 py-1 text-xs font-bold rounded"><?= $siH(strtoupper($result->ext)) ?></span></p>
 										<p class="mt-2"><span class="bg-green-600 text-white px-2 py-1 text-xs font-bold rounded">✓ PASS</span></p>
 									</div>
 									<div class="mt-3 pt-3 border-t border-gray-200">
 										<p class="text-xs font-mono bg-blue-100 px-2 py-1 font-bold text-center rounded">
-											$image-><?= $test['label'] ?>
+											$image-><?= $siH($test['label']) ?>
 										</p>
 									</div>
 								</div>
@@ -292,7 +296,7 @@
 							<?php
 						} else {
 							$testsFailed++;
-							echo '<div class="border-2 border-red-600 shadow p-4"><h4 class="font-bold">' . $test['label'] . '</h4><p class="text-red-600 font-bold mt-2">✗ FAIL</p></div>';
+							echo '<div class="border-2 border-red-600 shadow p-4"><h4 class="font-bold">' . $siH($test['label']) . '</h4><p class="text-red-600 font-bold mt-2">✗ FAIL</p></div>';
 						}
 					}
 					
@@ -302,16 +306,17 @@
 					if ($url && is_string($url)) {
 						$testsPassed++;
 						$squareForExt = $testImage->square(400);
+						$displayExt = $squareForExt ? $squareForExt->ext : $testImage->ext;
 						?>
 						<div class="border-2 border-green-600 shadow">
 							<div class="bg-gray-100 px-4 py-2 border-b-2 border-green-600">
 								<h4 class="font-bold">getSquareURL(400)</h4>
 							</div>
 							<div class="p-4">
-								<img src="<?= $url ?>" alt="Direct URL" class="w-full border border-gray-200 mb-2">
+								<img src="<?= $siH($url) ?>" alt="Direct URL" class="w-full border border-gray-200 mb-2">
 								<div class="text-sm">
 									<p>Returns URL only</p>
-									<p><span class="bg-gray-700 text-white px-2 py-1 text-xs font-bold rounded"><?= strtoupper($squareForExt->ext) ?></span></p>
+									<p><span class="bg-gray-700 text-white px-2 py-1 text-xs font-bold rounded"><?= $siH(strtoupper($displayExt)) ?></span></p>
 									<p class="mt-2"><span class="bg-green-600 text-white px-2 py-1 text-xs font-bold rounded">✓ PASS</span></p>
 								</div>
 								<div class="mt-3 pt-3 border-t border-gray-200">
@@ -353,18 +358,18 @@
 				?>
 					<div class="border-2 <?= $webp ? 'border-green-600' : 'border-red-600' ?> shadow">
 						<div class="bg-blue-600 text-white px-4 py-2 border-b-2 <?= $webp ? 'border-green-600' : 'border-red-600' ?>">
-							<h3 class="font-bold">Image #<?= $imgNum ?>: <?= strtoupper($img->ext) ?> → WebP</h3>
+							<h3 class="font-bold">Image #<?= $imgNum ?>: <?= $siH(strtoupper($img->ext)) ?> → WebP</h3>
 						</div>
 						<?php if ($webp): ?>
 							<div class="p-4">
-								<img src="<?= $webp->url ?>" alt="WebP <?= $imgNum ?>" class="w-full border border-gray-200 mb-3">
+								<img src="<?= $siH($webp->url) ?>" alt="WebP <?= $imgNum ?>" class="w-full border border-gray-200 mb-3">
 								<div class="text-xs space-y-1 bg-gray-50 p-3 rounded">
-									<p class="font-mono text-xs break-all"><?= $webp->basename ?></p>
-									<p>Original: <?= $img->ext ?> (<?= round($img->filesize / 1024, 2) ?> KB)</p>
-									<p>Square: <?= $square->ext ?> (<?= round($square->filesize / 1024, 2) ?> KB)</p>
-									<p>WebP: <?= $webp->ext ?> (<?= round($webp->filesize / 1024, 2) ?> KB)</p>
+									<p class="font-mono text-xs break-all"><?= $siH($webp->basename) ?></p>
+									<p>Original: <?= $siH($img->ext) ?> (<?= round($img->filesize / 1024, 2) ?> KB)</p>
+									<p>Square: <?= $siH($square->ext) ?> (<?= round($square->filesize / 1024, 2) ?> KB)</p>
+									<p>WebP: <?= $siH($webp->ext) ?> (<?= round($webp->filesize / 1024, 2) ?> KB)</p>
 									<p>Saved: <?= round(($square->filesize - $webp->filesize) / 1024, 2) ?> KB</p>
-									<p>Format: <span class="bg-gray-700 text-white px-2 py-1 font-bold rounded"><?= strtoupper($webp->ext) ?></span></p>
+									<p>Format: <span class="bg-gray-700 text-white px-2 py-1 font-bold rounded"><?= $siH(strtoupper($webp->ext)) ?></span></p>
 									<p class="mt-2 text-green-600 font-bold"><span class="bg-green-600 text-white px-2 py-1 rounded">✓ PASS</span></p>
 								</div>
 								<div class="mt-3 pt-3 border-t border-gray-200">
@@ -418,11 +423,11 @@
 						?>
 						<tr class="hover:bg-gray-50">
 							<td class="px-4 py-3 font-bold">#<?= $imgNum ?></td>
-							<td class="px-4 py-3"><span class="bg-gray-700 text-white px-2 py-1 font-bold text-xs rounded"><?= strtoupper($img->ext) ?></span></td>
+							<td class="px-4 py-3"><span class="bg-gray-700 text-white px-2 py-1 font-bold text-xs rounded"><?= $siH(strtoupper($img->ext)) ?></span></td>
 							<td class="px-4 py-3"><?= round($img->filesize / 1024, 2) ?> KB</td>
 							<td class="px-4 py-3"><?= round($square->filesize / 1024, 2) ?> KB</td>
 							<td class="px-4 py-3 font-bold text-green-600"><?= round($webp->filesize / 1024, 2) ?> KB</td>
-							<td class="px-4 py-3 font-mono text-xs"><?= $webp->basename ?></td>
+							<td class="px-4 py-3 font-mono text-xs"><?= $siH($webp->basename) ?></td>
 							<td class="px-4 py-3"><span class="bg-green-600 text-white px-2 py-1 font-bold text-xs rounded">-<?= $savingsVsSquare ?>%</span></td>
 						</tr>
 						<?php endforeach; ?>
@@ -485,10 +490,10 @@
 		<!-- Footer -->
 		<div class="border-t-2 border-gray-300 pt-8 mt-12">
 			<p class="text-center text-sm text-gray-600">
-				SquareImages v<?= $modules->getModuleInfo('SquareImages')['version'] ?> | 
+				SquareImages v<?= $siH($modules->getModuleInfo('SquareImages')['version']) ?> |
 				By Maxim Alex | 
 				smnv.org | 
-				December 27, 2025
+				May 16, 2026
 			</p>
 		</div>
 		

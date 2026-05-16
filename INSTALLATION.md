@@ -16,7 +16,7 @@ Complete installation instructions for the SquareImages module.
 
 ### Method 1: Direct Download (Recommended)
 
-1. Download the `SquareImages-v1.2.zip` file
+1. Download the `SquareImages-v1.3.0.zip` file
 2. Extract the archive
 3. Upload the `SquareImages` folder to `/site/modules/`
 4. Log in to your ProcessWire admin
@@ -46,7 +46,7 @@ Complete installation instructions for the SquareImages module.
 
 After installation, the module should appear in your modules list with:
 - **Title:** Square Images
-- **Version:** 1.2
+- **Version:** 1.3.0
 - **Author:** Maxim Alex
 
 ### 2. Test the Module
@@ -127,7 +127,7 @@ $square = $image->squareWidth(400);
 // Method 3: squareHeight(height)
 $square = $image->squareHeight(400);
 
-// Method 4: getSquareURL(size) - faster
+// Method 4: getSquareURL(size) - returns URL string directly
 $url = $image->getSquareURL(400);
 ```
 
@@ -219,13 +219,13 @@ With 3 test images (like the Coca-Cola bottles):
 
 ## Upgrading
 
-### From v1.0 or v1.1 to v1.2
+### From v1.0.0, v1.1.0, or v1.2.0 to v1.3.0
 
 1. **Backup** your site first!
 2. Replace the module files in `/site/modules/SquareImages/`
 3. In ProcessWire admin, go to **Modules**
 4. **Refresh** the modules list
-5. Module should show as version 1.2
+5. Module should show as version 1.3.0
 
 **No database changes** required - all changes are code-only.
 

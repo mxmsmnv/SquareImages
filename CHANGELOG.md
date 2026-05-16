@@ -2,7 +2,26 @@
 
 All notable changes to the SquareImages module will be documented in this file.
 
-## [1.2] - 2025-12-27
+## [1.3.0] - 2026-05-16
+
+### Added
+- Added explicit `['mode' => 'contain']` option for padded square output.
+- Added EXIF orientation handling for JPEG sources before resizing.
+
+### Changed
+- `square()` now returns `null` on generation failure instead of silently returning the original image.
+- Default square generation now performs centered crop-to-fill output, matching the documented smart-cropping behavior.
+- Square cache filenames now include the generation mode to avoid crop/contain collisions.
+
+### Fixed
+- Fixed lock cleanup on early returns during image generation.
+- Fixed WebP handling when the server can read WebP but cannot save WebP.
+- Hardened assets-path validation against prefix matches.
+- Made `getSquareGallery()` tolerant of single-image fields, invalid field values, and non-image items.
+- Escaped dynamic values in the test template.
+- Corrected invalid size examples in the documentation.
+
+## [1.2.0] - 2025-12-27
 
 ### Added
 - Comprehensive test suite (`test-squareimages.php`)
@@ -23,7 +42,7 @@ All notable changes to the SquareImages module will be documented in this file.
 - WebP filename conflicts with unique sizing
 - Test consistency across all image formats
 
-## [1.1] - 2025
+## [1.1.0] - 2025
 
 ### Added
 - `getSquareURL()` method for faster URL generation
@@ -35,7 +54,7 @@ All notable changes to the SquareImages module will be documented in this file.
 ### Fixed
 - Minor bugs in URL generation
 
-## [1.0] - 2025
+## [1.0.0] - 2025
 
 ### Added
 - Initial release

@@ -1,10 +1,10 @@
 # SquareImages for ProcessWire
 
-**Version:** 1.2  
+**Version:** 1.3.0
 **Author:** Maxim Alex  
 **Website:** [smnv.org](https://smnv.org)  
 **Email:** maxim@smnv.org  
-**Release Date:** December 27, 2025  
+**Release Date:** May 16, 2026
 **License:** MIT
 
 A ProcessWire module that creates perfect square images from any source format. Born from the real-world need to display vertical product images (like Coca-Cola bottles) uniformly in galleries and grids.
@@ -92,11 +92,11 @@ $square = $image->square(300);
 ## ✨ Features
 
 - **🎯 Perfect Squares**: Always creates exactly square images
-- **🔄 Smart Cropping**: Automatically centers crop on longer dimension
+- **🔄 Smart Cropping**: Automatically centers a square crop on the longer dimension
 - **📦 Format Preservation**: Maintains original format (JPG→JPG, PNG→PNG, GIF→GIF)
 - **🌐 WebP Support**: Chain with `->webp()` for optimal compression
-- **⚡ Performance**: Fast URL generation without filesystem lookups
-- **🎨 Quality**: Uses ProcessWire's native image engine
+- **⚡ Performance**: Cached square files and direct URL helper
+- **🎨 Quality**: Uses GD with configurable JPEG/WebP quality and PNG compression
 - **💾 Caching**: Automatic caching of generated images
 - **🔧 Multiple Methods**: `square()`, `squareWidth()`, `squareHeight()`, `getSquareURL()`
 
@@ -177,6 +177,13 @@ $square = $image->square(400);
 // Returns: Pageimage object (400×400)
 ```
 
+By default this crops the center of the image to fill the square. To preserve
+the whole image and add transparent/white padding instead:
+
+```php
+$square = $image->square(400, ['mode' => 'contain']);
+```
+
 #### `squareWidth($width)`
 Creates a square based on width dimension.
 
@@ -194,7 +201,7 @@ $square = $image->squareHeight(600);
 ```
 
 #### `getSquareURL($size)`
-Returns URL string directly (faster for rendering).
+Returns URL string directly.
 
 ```php
 $url = $image->getSquareURL(300);
@@ -363,10 +370,10 @@ foreach ($sizes as $name => $size) {
 
 ### 1. Use getSquareURL() for Simple Rendering
 ```php
-// Faster (returns string)
+// Returns string directly
 $url = $image->getSquareURL(300);
 
-// Slower (returns object)
+// Returns a Pageimage object
 $square = $image->square(300);
 $url = $square->url;
 ```
@@ -438,7 +445,15 @@ The module includes comprehensive test files:
 
 ## 📊 Version History
 
-### v1.2 (December 27, 2025)
+### v1.3.0 (May 16, 2026)
+- Added explicit `['mode' => 'contain']` option for padded square output
+- Fixed generation failures so `square()` returns `null` instead of the original image
+- Changed default output to centered crop-to-fill behavior
+- Hardened lock cleanup, WebP fallback, path validation, and gallery handling
+- Escaped dynamic values in the test template
+- Corrected invalid documentation examples
+
+### v1.2.0 (December 27, 2025)
 - Added comprehensive test suite
 - WebP conversion support
 - Format badges in tests
@@ -446,12 +461,12 @@ The module includes comprehensive test files:
 - Performance optimizations
 - Full documentation
 
-### v1.1 (2025)
+### v1.1.0 (2025)
 - Added `getSquareURL()` method
 - Performance improvements
 - Bug fixes
 
-### v1.0 (2025)
+### v1.0.0 (2025)
 - Initial release
 - Basic square() functionality
 

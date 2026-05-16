@@ -519,13 +519,13 @@ $('.slider').slick({
 $thumb = $image->square(150);
 
 // Grid items
-$grid = $image->square(300-400);
+$grid = $image->square(400);
 
 // Featured images
-$featured = $image->square(600-800);
+$featured = $image->square(800);
 
 // Full screen
-$large = $image->square(1200-1600);
+$large = $image->square(1600);
 ```
 
 ### 2. Use WebP When Possible

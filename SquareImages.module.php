@@ -17,7 +17,7 @@
  * - $page->getSquareGallery(500, 700);
  * 
  * @author Maxim Alex <maxim@smnv.org>
- * @version 1.2
+ * @version 1.3.0
  * @see https://smnv.org
  * @license MIT
  * 
@@ -32,7 +32,7 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		return [
 			'title' => 'Square Images',
 			'summary' => 'Creates perfect square images from any source format with smart cropping',
-			'version' => '1.2',
+			'version' => '1.3.0',
 			'author' => 'Maxim Alex',
 			'href' => 'https://smnv.org',
 			'icon' => 'crop',
@@ -100,15 +100,18 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		$image = $event->object;
 		$size = $this->validateSize($event->arguments(0));
 		$options = $event->arguments(1) ?: [];
+		if (!is_array($options)) {
+			$options = [];
+		}
 		
 		if (!$image || !$image instanceof Pageimage) {
 			$event->return = null;
 			return;
 		}
 		
-		// Create the square version
-		$square = $this->createSquareImage($image, $size, $options);
-		$event->return = $square ?: $image;
+		// Return null on failure so callers can distinguish a failed variation
+		// from a valid square image.
+		$event->return = $this->createSquareImage($image, $size, $options);
 	}
 	
 	/**
@@ -118,6 +121,9 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 	public function hookSquareWidth(HookEvent $event) {
 		$size = $this->validateSize($event->arguments(0));
 		$options = $event->arguments(1) ?: [];
+		if (!is_array($options)) {
+			$options = [];
+		}
 		$event->arguments = [$size, $options];
 		$this->hookSquare($event);
 	}
@@ -129,6 +135,9 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 	public function hookSquareHeight(HookEvent $event) {
 		$size = $this->validateSize($event->arguments(0));
 		$options = $event->arguments(1) ?: [];
+		if (!is_array($options)) {
+			$options = [];
+		}
 		$event->arguments = [$size, $options];
 		$this->hookSquare($event);
 	}
@@ -155,7 +164,7 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 	}
 
 	/**
-	 * Creates a square image with centered content
+	 * Creates a square image with centered crop by default.
 	 * 
 	 * @param Pageimage $image The source image
 	 * @param int $targetSize Size of the square
@@ -168,6 +177,10 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		$originalPath = $image->filename;
 		$originalDir = dirname($originalPath);
 		$originalExtension = strtolower(pathinfo($originalPath, PATHINFO_EXTENSION));
+		$mode = isset($options['mode']) ? strtolower((string) $options['mode']) : 'crop';
+		if (!in_array($mode, ['crop', 'contain'], true)) {
+			$mode = 'crop';
+		}
 		
 		// Check file size limit (security)
 		$fileSize = @filesize($originalPath);
@@ -217,6 +230,10 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		
 		// Determine actual extension (WebP might fallback to JPG)
 		$actualExtension = $originalExtension;
+		if ($originalExtension === 'webp' && !function_exists('imagecreatefromwebp')) {
+			$this->error("WebP read support is not available: {$originalPath}");
+			return null;
+		}
 		if ($originalExtension === 'webp' && !function_exists('imagewebp')) {
 			$actualExtension = 'jpg';
 			if ($this->enableLogging) {
@@ -225,7 +242,8 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		}
 		
 		// Create cached filename with ACTUAL extension
-		$cachedName = "{$nameWithoutExt}.{$targetSize}x{$targetSize}sq.{$actualExtension}";
+		$modeSuffix = $mode === 'contain' ? 'contain' : 'crop';
+		$cachedName = "{$nameWithoutExt}.{$targetSize}x{$targetSize}sq-{$modeSuffix}.{$actualExtension}";
 		$cachedPath = "{$originalDir}/{$cachedName}";
 		
 		// Early exit if cached version exists
@@ -291,13 +309,10 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		$realCachedDir = realpath($originalDir);
 		$realAssetsPath = realpath($this->wire('config')->paths->assets);
 		
-		if ($realCachedDir === false || $realAssetsPath === false || 
-		    strpos($realCachedDir, $realAssetsPath) !== 0) {
+		if (!$this->isPathWithin($realCachedDir, $realAssetsPath)) {
 			$this->error("Security: Invalid path detected");
 			// Release lock
-			flock($lockHandle, LOCK_UN);
-			fclose($lockHandle);
-			@unlink($lockFile);
+			$this->releaseLock($lockHandle, $lockFile);
 			return null;
 		}
 		
@@ -311,11 +326,11 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		if (!$src) {
 			$this->error("Failed to create GD resource from: {$originalPath}");
 			// Release lock
-			flock($lockHandle, LOCK_UN);
-			fclose($lockHandle);
-			@unlink($lockFile);
+			$this->releaseLock($lockHandle, $lockFile);
 			return null;
 		}
+
+		$src = $this->applyExifOrientation($src, $originalPath, $originalExtension);
 		
 		// Get actual dimensions
 		$srcWidth = imagesx($src);
@@ -326,6 +341,7 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		    $srcWidth < 1 || $srcHeight < 1 ||
 		    $srcWidth > 100000 || $srcHeight > 100000) {
 			imagedestroy($src);
+			$this->releaseLock($lockHandle, $lockFile);
 			$this->error("Invalid image dimensions: {$srcWidth}x{$srcHeight}");
 			return null;
 		}
@@ -333,24 +349,40 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		// Optimization: if image is already the target size, return original
 		if ($srcWidth === $targetSize && $srcHeight === $targetSize) {
 			imagedestroy($src);
+			$this->releaseLock($lockHandle, $lockFile);
 			if ($this->enableLogging) {
 				$this->log("Image already target size, using original");
 			}
 			return $image;
 		}
 		
-		// Calculate proportional dimensions to fit within square
-		if ($srcWidth > $srcHeight) {
-			$newWidth = $targetSize;
-			$newHeight = (int)(($targetSize / $srcWidth) * $srcHeight);
+		// Calculate proportional dimensions. Crop fills the square, contain pads it.
+		if ($mode === 'contain') {
+			$scale = min($targetSize / $srcWidth, $targetSize / $srcHeight);
+			$newWidth = (int) round($srcWidth * $scale);
+			$newHeight = (int) round($srcHeight * $scale);
+			$srcX = 0;
+			$srcY = 0;
+			$copySrcWidth = $srcWidth;
+			$copySrcHeight = $srcHeight;
+			$dstX = (int) round(($targetSize - $newWidth) / 2);
+			$dstY = (int) round(($targetSize - $newHeight) / 2);
 		} else {
+			$cropSize = min($srcWidth, $srcHeight);
+			$srcX = (int) floor(($srcWidth - $cropSize) / 2);
+			$srcY = (int) floor(($srcHeight - $cropSize) / 2);
+			$copySrcWidth = $cropSize;
+			$copySrcHeight = $cropSize;
+			$newWidth = $targetSize;
 			$newHeight = $targetSize;
-			$newWidth = (int)(($targetSize / $srcHeight) * $srcWidth);
+			$dstX = 0;
+			$dstY = 0;
 		}
 		
 		// Ensure dimensions are valid after calculation
 		if ($newWidth < 1 || $newHeight < 1 || $newWidth > $targetSize || $newHeight > $targetSize) {
 			imagedestroy($src);
+			$this->releaseLock($lockHandle, $lockFile);
 			$this->error("Calculated dimensions invalid: {$newWidth}x{$newHeight}");
 			return null;
 		}
@@ -361,20 +393,18 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 			imagedestroy($src);
 			$this->error("Failed to create destination image");
 			// Release lock
-			flock($lockHandle, LOCK_UN);
-			fclose($lockHandle);
-			@unlink($lockFile);
+			$this->releaseLock($lockHandle, $lockFile);
 			return null;
 		}
 		
 		// Handle transparency based on format
-		if ($originalExtension === 'png' || $originalExtension === 'webp') {
+		if ($actualExtension === 'png' || $actualExtension === 'webp') {
 			// Alpha channel transparency (PNG, WebP)
 			imagealphablending($dst, false);
 			imagesavealpha($dst, true);
 			$transparent = imagecolorallocatealpha($dst, 255, 255, 255, 127);
 			imagefill($dst, 0, 0, $transparent);
-		} elseif ($originalExtension === 'gif') {
+		} elseif ($actualExtension === 'gif') {
 			// Indexed transparency (GIF)
 			$transparentIndex = imagecolortransparent($src);
 			if ($transparentIndex >= 0) {
@@ -416,18 +446,22 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 			imagefill($dst, 0, 0, $white);
 		}
 		
-		// Calculate centering coordinates with proper rounding
-		$x = (int) round(($targetSize - $newWidth) / 2);
-		$y = (int) round(($targetSize - $newHeight) / 2);
-		
 		// Resample and copy
-		imagecopyresampled(
+		$resampled = imagecopyresampled(
 			$dst, $src,
-			$x, $y,
-			0, 0,
+			$dstX, $dstY,
+			$srcX, $srcY,
 			$newWidth, $newHeight,
-			$srcWidth, $srcHeight
+			$copySrcWidth, $copySrcHeight
 		);
+
+		if (!$resampled) {
+			imagedestroy($src);
+			imagedestroy($dst);
+			$this->releaseLock($lockHandle, $lockFile);
+			$this->error("Failed to resample image: {$originalPath}");
+			return null;
+		}
 		
 		// Save the image based on format (use actual extension, not original)
 		$saved = $this->saveGDImage($dst, $cachedPath, $actualExtension);
@@ -437,9 +471,7 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		imagedestroy($dst);
 		
 		// Release lock and remove lock file
-		flock($lockHandle, LOCK_UN);
-		fclose($lockHandle);
-		@unlink($lockFile);
+		$this->releaseLock($lockHandle, $lockFile);
 		
 		if (!$saved) {
 			$this->error("Failed to save square image: {$cachedPath}");
@@ -452,6 +484,77 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		
 		// Return as Pageimage object
 		return $this->getPageimageFromPath($image, $cachedPath);
+	}
+
+	/**
+	 * Release an image generation lock and remove its marker file.
+	 *
+	 * @param resource|null $lockHandle
+	 * @param string $lockFile
+	 */
+	protected function releaseLock($lockHandle, $lockFile) {
+		if ($lockHandle) {
+			flock($lockHandle, LOCK_UN);
+			fclose($lockHandle);
+		}
+		if ($lockFile) {
+			@unlink($lockFile);
+		}
+	}
+
+	/**
+	 * Confirm a path is inside the configured ProcessWire assets directory.
+	 *
+	 * @param string|false $path
+	 * @param string|false $parent
+	 * @return bool
+	 */
+	protected function isPathWithin($path, $parent) {
+		if ($path === false || $parent === false) {
+			return false;
+		}
+
+		$path = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+		$parent = rtrim($parent, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+		return strpos($path, $parent) === 0;
+	}
+
+	/**
+	 * Apply EXIF orientation for JPEG sources before resizing.
+	 *
+	 * @param resource $src
+	 * @param string $path
+	 * @param string $extension
+	 * @return resource
+	 */
+	protected function applyExifOrientation($src, $path, $extension) {
+		if (!in_array($extension, ['jpg', 'jpeg'], true) || !function_exists('exif_read_data')) {
+			return $src;
+		}
+
+		$exif = @exif_read_data($path);
+		$orientation = isset($exif['Orientation']) ? (int) $exif['Orientation'] : 1;
+		$rotated = null;
+
+		switch ($orientation) {
+			case 3:
+				$rotated = imagerotate($src, 180, 0);
+				break;
+			case 6:
+				$rotated = imagerotate($src, -90, 0);
+				break;
+			case 8:
+				$rotated = imagerotate($src, 90, 0);
+				break;
+		}
+
+		if ($rotated) {
+			imagedestroy($src);
+			return $rotated;
+		}
+
+		return $src;
 	}
 	
 	/**
@@ -663,7 +766,16 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		
 		$images = $page->get($fieldName);
 		
-		if (!$images || !count($images)) {
+		if ($images instanceof Pageimage) {
+			$images = [$images];
+		}
+
+		if (!$images || !is_iterable($images)) {
+			$event->return = json_encode([]);
+			return;
+		}
+
+		if (is_countable($images) && !count($images)) {
 			$event->return = json_encode([]);
 			return;
 		}
@@ -671,6 +783,10 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 		$galleryData = [];
 		
 		foreach ($images as $image) {
+			if (!$image instanceof Pageimage) {
+				continue;
+			}
+
 			// Skip very small images (use smaller of the two sizes as threshold)
 			$minSize = min($thumbSize, $largeSize);
 			if ($image->width <= $minSize && $image->height <= $minSize) {
@@ -697,7 +813,7 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 			];
 		}
 		
-		$event->return = json_encode($galleryData);
+		$event->return = json_encode($galleryData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 	}
 
 	/**
