@@ -1,5 +1,10 @@
 # Test Images Folder
 
+**Author:** Maxim Semenov  
+**Website:** [smnv.org](https://smnv.org)  
+**Email:** [maxim@smnv.org](mailto:maxim@smnv.org)
+
+
 ## Recommended: Coca-Cola Bottle Images
 
 Upload 3 vertical bottle images in different formats:

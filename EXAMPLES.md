@@ -557,6 +557,6 @@ echo "<img src='" . $image->getSquareURL(300) . "'>";
 
 ---
 
-**Created by Maxim Alex | smnv.org**
+**Created by Maxim Semenov | smnv.org**
 
 *Making images square, one pixel at a time.* 🎯

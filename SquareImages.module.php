@@ -16,7 +16,7 @@
  * - $image->getSquareURL(500);
  * - $page->getSquareGallery(500, 700);
  * 
- * @author Maxim Alex <maxim@smnv.org>
+ * @author Maxim Semenov <maxim@smnv.org> (smnv.org)
  * @version 1.3.0
  * @see https://smnv.org
  * @license MIT
@@ -33,7 +33,7 @@ class SquareImages extends WireData implements Module, ConfigurableModule {
 			'title' => 'Square Images',
 			'summary' => 'Creates perfect square images from any source format with smart cropping',
 			'version' => '1.3.0',
-			'author' => 'Maxim Alex',
+			'author' => 'Maxim Semenov',
 			'href' => 'https://smnv.org',
 			'icon' => 'crop',
 			'autoload' => true,

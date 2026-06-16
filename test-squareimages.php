@@ -28,7 +28,7 @@
 		<div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-8 mb-12 shadow-lg">
 			<h1 class="text-4xl font-bold mb-2">SquareImages Module v1.3.0</h1>
 			<p class="text-xl text-blue-100">Complete Test Suite</p>
-			<p class="text-sm text-blue-200 mt-2">By Maxim Alex | smnv.org | maxim@smnv.org</p>
+			<p class="text-sm text-blue-200 mt-2">By Maxim Semenov | smnv.org | maxim@smnv.org</p>
 		</div>
 		
 		<?php
@@ -71,7 +71,7 @@
 						</tr>
 						<tr class="hover:bg-gray-50">
 							<td class="px-6 py-4 font-semibold">Author</td>
-							<td class="px-6 py-4">Maxim Alex</td>
+							<td class="px-6 py-4">Maxim Semenov</td>
 						</tr>
 						<tr class="hover:bg-gray-50">
 							<td class="px-6 py-4 font-semibold">Total Images on Page</td>
@@ -491,7 +491,7 @@
 		<div class="border-t-2 border-gray-300 pt-8 mt-12">
 			<p class="text-center text-sm text-gray-600">
 				SquareImages v<?= $siH($modules->getModuleInfo('SquareImages')['version']) ?> |
-				By Maxim Alex | 
+				By Maxim Semenov | 
 				smnv.org | 
 				May 16, 2026
 			</p>

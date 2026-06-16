@@ -47,7 +47,7 @@ Complete installation instructions for the SquareImages module.
 After installation, the module should appear in your modules list with:
 - **Title:** Square Images
 - **Version:** 1.3.0
-- **Author:** Maxim Alex
+- **Author:** Maxim Semenov
 
 ### 2. Test the Module
 
@@ -300,6 +300,6 @@ Contributions welcome! Please:
 
 ---
 
-**Made with ❤️ by Maxim Alex**
+**Made with ❤️ by Maxim Semenov**
 
 *Installation made simple.*

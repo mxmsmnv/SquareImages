@@ -1,10 +1,12 @@
 # SquareImages for ProcessWire
 
 **Version:** 1.3.0
-**Author:** Maxim Alex  
+
+**Author:** Maxim Semenov  
 **Website:** [smnv.org](https://smnv.org)  
+**Email:** [maxim@smnv.org](mailto:maxim@smnv.org)
+
 If this project helps your work, consider supporting future development: [GitHub Sponsors](https://github.com/sponsors/mxmsmnv) or [smnv.org/sponsor](https://smnv.org/sponsor/).  
-**Email:** maxim@smnv.org  
 **Release Date:** May 16, 2026
 **License:** MIT
 
@@ -489,7 +491,7 @@ Contributions welcome! Please:
 
 MIT License
 
-Copyright (c) 2025 Maxim Alex (smnv.org)
+Copyright (c) 2025 Maxim Semenov (smnv.org)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -526,6 +528,6 @@ Test images (Coca-Cola bottles) used for demonstration purposes only. Coca-Cola�
 
 ---
 
-**Made with ❤️ by Maxim Alex**
+**Made with ❤️ by Maxim Semenov**
 
 *Transform any image into a perfect square. Simple, elegant, powerful.*
