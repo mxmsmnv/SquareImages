@@ -2,6 +2,8 @@
 
 **Version:** 1.3.0
 
+![SquareImages](assets/SquareImages.png)
+
 **Author:** Maxim Semenov  
 **Website:** [smnv.org](https://smnv.org)  
 **Email:** [maxim@smnv.org](mailto:maxim@smnv.org)
